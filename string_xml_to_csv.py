@@ -1,9 +1,8 @@
 import argparse
 import os
 import re
-import xml.etree.ElementTree as ET
-import xmltodict
 
+import xmltodict
 
 VALUE_FOLDER = "values"
 STRING_FILENAME = "strings.xml"
