@@ -27,7 +27,7 @@ def read_arguments():
     parser.add_argument("res_folder", help="The resource folder containing the string.xml files/folders")
     parser.add_argument("csv_file", help="The (destination) csv file")
     parser.add_argument("-sep", default="\t", help="The csv-seperator")
-    parser.add_argument("-r",  "--reverse", action="store_true")
+    parser.add_argument("-r", "--reverse", action="store_true")
     args = parser.parse_args()
     return args.res_folder, args.csv_file, args.sep, args.reverse
 
@@ -73,16 +73,8 @@ def process_res_folder(res_folder, dest_file, seperator):
 
 
 def escape_unicodes(string):
-    # return string.encode("unicode_escape")\
-    #     .decode()\
-    #     .replace("\\xe4", "ä")\
-    #     .replace("\\xf6", "ö")\
-    #     .replace("\\xfc", "ü")\
-    #     .replace("\\xe0", "à")\
-    #     .replace("\\xe9", "é")\
-    #     .replace("\\xe7", "ç")\
-    #     .replace("\\xdf", "ß")
     return string.replace("\u200b", "\\u200b").replace("\u2011", "\\u2011")
+
 
 def read_def_string_file(res_folder, sub_folders):
     if VALUE_FOLDER not in sub_folders:
@@ -106,9 +98,8 @@ def process_csv_file(csv_file_path, res_folder, separator):
     string_dicts, language_brevs = get_string_dicts_from_csv(csv_file_path, separator)
     print(string_dicts)
     print(language_brevs)
-    for language in language_brevs:
+    for language in ["default"] + language_brevs:
         create_string_xml(string_dicts, language, res_folder)
-
 
 
 def create_string_xml(string_dicts, language, res_folder):
