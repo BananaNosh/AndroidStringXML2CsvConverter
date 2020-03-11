@@ -44,7 +44,7 @@ def process_res_folder(res_folder, dest_file, seperator):
         with open(string_file_path, "r") as string_file:
             language_brev = f[-2:]
             print(f"Found language: {language_brev}")
-            string_dict = xmltodict.parse(string_file.read())["resources"]["string"]
+            string_dict = xmltodict.parse(string_file.read())["resources"]["string"]  # TODO workaround for not loosing trailing whitespace
             for value_dict in string_dict:
                 if TEXT_KEY in value_dict and NAME_KEY in value_dict:
                     index = indices_dict[value_dict[NAME_KEY]]
@@ -86,7 +86,7 @@ def read_def_string_file(res_folder, sub_folders):
     with open(def_string_file_path, "r") as def_string_file:
         string_text = def_string_file.read()
         string_text = re.sub(COMMENT_PATTERN, COMMENT_XML, string_text)
-        string_dict = xmltodict.parse(string_text)["resources"]["string"]
+        string_dict = xmltodict.parse(string_text)["resources"]["string"]  # TODO workaround for not loosing trailing whitespace
         indices_dict = {}
         for i, d in enumerate(string_dict):
             if NAME_KEY in d:
