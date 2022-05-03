@@ -28,11 +28,14 @@ def read_arguments():
     parser.add_argument("csv_file", help="The (destination) csv file")
     parser.add_argument("-sep", default="\t", help="The csv-seperator")
     parser.add_argument("-r", "--reverse", action="store_true")
+    parser.add_argument("-o", "--order", nargs='+', help="The order of the columns for the locales. E.g. 'en fr de', "
+                                                         "not given ones are lexicographically sorted")
     args = parser.parse_args()
-    return args.res_folder, args.csv_file, args.sep, args.reverse
+    print("order", args.order)
+    return args.res_folder, args.csv_file, args.sep, args.reverse, args.order
 
 
-def process_res_folder(res_folder, dest_file, seperator):
+def process_res_folder(res_folder, dest_file, seperator, order):
     sub_folders = os.listdir(res_folder)
     pattern = re.compile(r"values-[a-z]{2}")
     language_value_folders = [f for f in sub_folders if re.fullmatch(pattern, f)]
@@ -44,13 +47,16 @@ def process_res_folder(res_folder, dest_file, seperator):
         with open(string_file_path, "r") as string_file:
             language_brev = f[-2:]
             print(f"Found language: {language_brev}")
-            string_dict = xmltodict.parse(string_file.read())["resources"]["string"]  # TODO workaround for not loosing trailing whitespace
+            string_dict = xmltodict.parse(string_file.read())["resources"][
+                "string"]  # TODO workaround for not loosing trailing whitespace
             for value_dict in string_dict:
                 if TEXT_KEY in value_dict and NAME_KEY in value_dict:
                     index = indices_dict[value_dict[NAME_KEY]]
                     def_string_dict[index][language_brev] = value_dict[TEXT_KEY]
     print(def_string_dict)
     languages = [path[-2:] for path in language_value_folders]
+    languages = [lang for lang in order if lang in languages] + [lang for lang in sorted(languages) if lang not in order]
+    print("langs", languages)
     with open(dest_file, "w+") as f:
         f.write(seperator.join(["key", "default"] + languages + ["extra_arguments"]) + "\n")
         for value_dict in def_string_dict:
@@ -86,11 +92,13 @@ def read_def_string_file(res_folder, sub_folders):
     with open(def_string_file_path, "r") as def_string_file:
         string_text = def_string_file.read()
         string_text = re.sub(COMMENT_PATTERN, COMMENT_XML, string_text)
-        string_dict = xmltodict.parse(string_text)["resources"]["string"]  # TODO workaround for not loosing trailing whitespace
+        string_dict = xmltodict.parse(string_text)["resources"][
+            "string"]  # TODO workaround for not loosing trailing whitespace
         indices_dict = {}
         for i, d in enumerate(string_dict):
             if NAME_KEY in d:
                 indices_dict[d[NAME_KEY]] = i
+
     return string_dict, indices_dict
 
 
@@ -163,8 +171,8 @@ def get_string_dicts_from_csv(csv_file_path, separator):
 
 
 if __name__ == '__main__':
-    _res_folder, _csv_file, _separator, _reverse = read_arguments()
+    _res_folder, _csv_file, _separator, _reverse, _order = read_arguments()
     if not _reverse:
-        process_res_folder(_res_folder, _csv_file, _separator)
+        process_res_folder(_res_folder, _csv_file, _separator, _order)
     else:
         process_csv_file(_csv_file, _res_folder, _separator)
